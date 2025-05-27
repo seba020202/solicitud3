@@ -1,25 +1,20 @@
 <!DOCTYPE html>
-<html lang="en" >
-<head>
-  <meta charset="UTF-8">
-  <title>Untitled</title>
-  
-
-</head>
-<body>
-<!-- partial:index.partial.html -->
-<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sistema de Materiales</title>
+  <title>Sistema de Máquinas</title>
   <style>
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
       font-family: 'Arial', sans-serif;
+    }
+    
+    html, body {
+      height: 100%;
+      overflow: hidden;
     }
     
     body {
@@ -29,6 +24,16 @@
       justify-content: center;
       align-items: center;
       min-height: 100vh;
+    }
+    
+    .app-container {
+      width: 100%;
+      height: 100vh;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch; /* Para un desplazamiento suave en iOS */
+      padding: 20px;
+      display: flex;
+      justify-content: center;
     }
     
     .hidden {
@@ -42,6 +47,7 @@
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
       width: 100%;
       max-width: 800px;
+      margin: 20px 0;
     }
     
     h1, h2 {
@@ -177,232 +183,312 @@
       flex: 1;
     }
     
-    .image-preview {
-      max-width: 100px;
-      max-height: 100px;
-      margin-top: 10px;
+    /* Estilos para el modal */
+    .modal {
       display: none;
+      position: fixed;
+      z-index: 100;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      overflow-y: auto;
     }
     
-    .material-image {
-      max-width: 50px;
-      max-height: 50px;
+    .modal-content {
+      background-color: white;
+      margin: 15% auto;
+      padding: 20px;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 500px;
+    }
+    
+    .close {
+      float: right;
+      font-size: 24px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    
+    /* Estilos para imágenes */
+    .machine-image {
+      max-width: 100px;
+      max-height: 100px;
       border-radius: 4px;
+      margin-top: 10px;
+    }
+    
+    .image-preview {
+      max-width: 200px;
+      max-height: 200px;
+      display: block;
+      margin: 10px 0;
+    }
+    
+    .machine-image-cell {
+      width: 120px;
+    }
+    
+    /* Estilo para stock bajo */
+    .low-stock {
+      color: #e74c3c;
+      font-weight: bold;
+    }
+    
+    .low-stock-option {
+      color: #e74c3c;
+      font-weight: bold;
+    }
+
+    /* Barra de desplazamiento personalizada */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #888;
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #555;
     }
   </style>
 </head>
 <body>
-  <!-- Selección de Rol -->
-  <div class="container" id="roleSelectionView">
-    <h1>Sistema de Solicitud de Materiales</h1>
-    <p class="form-group">Seleccione su rol para continuar:</p>
-    <div class="role-selector">
-      <button id="studentRoleBtn" class="btn-success">Soy Estudiante</button>
-      <button id="adminRoleBtn" class="btn-secondary">Soy Administrador</button>
-    </div>
-  </div>
-  
-  <!-- Login para Admin -->
-  <div class="container hidden" id="adminLoginView">
-    <h1>Acceso Administrador</h1>
-    <div class="card">
-      <form id="adminLoginForm">
-        <div class="form-group">
-          <label for="adminEmail">Correo Electrónico</label>
-          <input type="email" id="adminEmail" required>
-        </div>
-        <div class="form-group">
-          <label for="adminPassword">Contraseña</label>
-          <input type="password" id="adminPassword" required>
-        </div>
-        <button type="submit" class="btn-success">Ingresar</button>
-      </form>
-    </div>
-    <button id="backToRoleBtn" class="btn-secondary">Volver</button>
-  </div>
-  
-  <!-- Panel de Estudiante -->
-  <div class="container hidden" id="studentView">
-    <h1>Solicitud de Materiales</h1>
-    <div id="confirmationMessage" class="confirmation">
-      Solicitud enviada correctamente. Se ha enviado una copia a su correo electrónico.
+  <div class="app-container">
+    <!-- Selección de Rol -->
+    <div class="container" id="roleSelectionView">
+      <h1>Solicitud de Máquinas</h1>
+      <p class="form-group">Seleccione su rol para continuar:</p>
+      <div class="role-selector">
+        <button id="studentRoleBtn" class="btn-success">Soy Estudiante</button>
+        <button id="adminRoleBtn" class="btn-secondary">Soy Encargado</button>
+      </div>
     </div>
     
-    <div class="card">
-      <form id="requestForm">
-        <div class="form-group">
-          <label for="studentName">Nombre Completo</label>
-          <input type="text" id="studentName" required>
-        </div>
-        
-        <div class="form-group">
-          <label for="studentEmail">Correo Electrónico</label>
-          <input type="email" id="studentEmail" required>
-        </div>
-        
-        <div class="form-group">
-          <label for="studentPhone">Número de Teléfono</label>
-          <input type="tel" id="studentPhone" required>
-        </div>
-        
-        <div class="form-group">
-          <label for="studentCareer">Carrera</label>
-          <input type="text" id="studentCareer" required>
-        </div>
-        
-        <div class="form-group">
-          <label for="materialSelect">Material Solicitado</label>
-          <select id="materialSelect" required>
-            <option value="">Seleccione un material...</option>
-          </select>
-        </div>
-        
-        <div class="form-group">
-          <label for="requestQuantity">Cantidad Necesaria</label>
-          <input type="number" id="requestQuantity" min="1" required>
-        </div>
-        
-        <div class="date-group">
+    <!-- Login para Encargado -->
+    <div class="container hidden" id="adminLoginView">
+      <h1>Acceso Encargado</h1>
+      <div class="card">
+        <form id="adminLoginForm">
           <div class="form-group">
-            <label for="requestDate">Fecha de Préstamo</label>
-            <input type="date" id="requestDate" required>
+            <label for="adminEmail">Correo Electrónico</label>
+            <input type="email" id="adminEmail" required>
           </div>
           <div class="form-group">
-            <label for="returnDate">Fecha de Devolución</label>
-            <input type="date" id="returnDate" required>
+            <label for="adminPassword">Contraseña</label>
+            <input type="password" id="adminPassword" required>
           </div>
-        </div>
-        
-        <div class="form-group">
-          <label for="comments">Comentarios Adicionales</label>
-          <textarea id="comments" rows="3"></textarea>
-        </div>
-        
-        <button type="submit" class="btn-success">Enviar Solicitud</button>
-      </form>
+          <button type="submit" class="btn-success">Ingresar</button>
+        </form>
+      </div>
+      <button id="backToRoleBtn" class="btn-secondary">Volver</button>
     </div>
     
-    <button id="studentLogoutBtn" class="btn-secondary">Volver al inicio</button>
-  </div>
-  
-  <!-- Panel de Administrador -->
-  <div class="container hidden" id="adminView">
-    <h1>Panel del Administrador</h1>
-    
-    <div class="flex-buttons">
-      <button id="addMaterialBtn" class="btn-success">Agregar Material</button>
-      <button id="exportExcelBtn" class="btn-info" onclick="exportToExcel()">Descargar Excel</button>
+    <!-- Panel de Estudiante -->
+    <div class="container hidden" id="studentView">
+      <h1>Solicitud de Máquinas</h1>
+      <div id="confirmationMessage" class="confirmation">
+        Solicitud enviada correctamente. Se ha enviado una copia a su correo electrónico.
+      </div>
+      
+      <div class="card">
+        <form id="requestForm">
+          <div class="form-group">
+            <label for="studentName">Nombre Completo</label>
+            <input type="text" id="studentName" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="studentEmail">Correo Electrónico</label>
+            <input type="email" id="studentEmail" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="studentPhone">Número de Teléfono</label>
+            <input type="tel" id="studentPhone" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="studentCareer">Carrera</label>
+            <input type="text" id="studentCareer" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="machineSelect">Máquina Solicitada</label>
+            <select id="machineSelect" required>
+              <option value="">Seleccione una máquina...</option>
+            </select>
+            <div id="machineImagePreview"></div>
+          </div>
+          
+          <div class="form-group">
+            <label for="requestQuantity">Cantidad Necesaria</label>
+            <input type="number" id="requestQuantity" min="1" required>
+          </div>
+          
+          <div class="date-group">
+            <div class="form-group">
+              <label for="requestDate">Fecha de Préstamo</label>
+              <input type="date" id="requestDate" required>
+            </div>
+            <div class="form-group">
+              <label for="returnDate">Fecha de Devolución</label>
+              <input type="date" id="returnDate" required>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="comments">Comentarios Adicionales</label>
+            <textarea id="comments" rows="3"></textarea>
+          </div>
+          
+          <button type="submit" class="btn-success">Enviar Solicitud</button>
+        </form>
+      </div>
+      
+      <button id="studentLogoutBtn" class="btn-secondary">Volver al inicio</button>
     </div>
     
-    <div class="card">
-      <h2>Gestionar Materiales</h2>
-      <table id="materialsTable">
-        <thead>
-          <tr>
-            <th>Imagen</th>
-            <th>Nombre</th>
-            <th>Descripción</th>
-            <th>Disponibles</th>
-            <th>Mínimo</th>
-            <th>Máximo</th>
-            <th>Ubicación</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- Los materiales se cargarán aquí -->
-        </tbody>
-      </table>
+    <!-- Panel de Encargado -->
+    <div class="container hidden" id="adminView">
+      <h1>Panel del Encargado</h1>
+      
+      <div class="flex-buttons">
+        <button id="addMachineBtn" class="btn-success">Agregar Máquina</button>
+        <button id="exportMachinesExcelBtn" class="btn-info">Descargar Máquinas</button>
+        <button id="exportRequestsExcelBtn" class="btn-info">Descargar Solicitudes</button>
+      </div>
+      
+      <div class="card">
+        <h2>Gestionar Máquinas</h2>
+        <table id="machinesTable">
+          <thead>
+            <tr>
+              <th class="machine-image-cell">Imagen</th>
+              <th>Nombre</th>
+              <th>Descripción</th>
+              <th>Disponibles</th>
+              <th>Mínimo</th>
+              <th>Máximo</th>
+              <th>Ubicación</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Las máquinas se cargarán aquí -->
+          </tbody>
+        </table>
+      </div>
+      
+      <div class="card">
+        <h2>Solicitudes de Estudiantes</h2>
+        <table id="adminRequestsTable">
+          <thead>
+            <tr>
+              <th>Estudiante</th>
+              <th>Correo</th>
+              <th>Máquina</th>
+              <th>Cantidad</th>
+              <th>Fecha Préstamo</th>
+              <th>Fecha Devolución</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Las solicitudes se cargarán aquí -->
+          </tbody>
+        </table>
+      </div>
+      
+      <button id="adminLogoutBtn" class="btn-secondary">Cerrar Sesión</button>
     </div>
     
-    <div class="card">
-      <h2>Solicitudes de Estudiantes</h2>
-      <table id="adminRequestsTable">
-        <thead>
-          <tr>
-            <th>Estudiante</th>
-            <th>Material</th>
-            <th>Cantidad</th>
-            <th>Fecha Préstamo</th>
-            <th>Fecha Devolución</th>
-            <th>Estado</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- Las solicitudes se cargarán aquí -->
-        </tbody>
-      </table>
+    <!-- Modal para agregar/editar máquinas -->
+    <div id="machineModal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2 id="modalTitle">Agregar Máquina</h2>
+        <form id="machineForm">
+          <input type="hidden" id="machineId">
+          <div class="form-group">
+            <label for="machineName">Nombre de la Máquina</label>
+            <input type="text" id="machineName" required>
+          </div>
+          <div class="form-group">
+            <label for="machineDescription">Descripción</label>
+            <textarea id="machineDescription" rows="2" required></textarea>
+          </div>
+          <div class="form-group">
+            <label for="machineImage">Imagen de la Máquina</label>
+            <input type="file" id="machineImage" accept="image/*">
+            <img id="imagePreview" class="image-preview" style="display: none;">
+          </div>
+          <div class="form-group">
+            <label for="machineQuantity">Cantidad Disponible</label>
+            <input type="number" id="machineQuantity" min="0" required>
+          </div>
+          <div class="form-group">
+            <label for="machineMin">Cantidad Mínima</label>
+            <input type="number" id="machineMin" min="0" required>
+          </div>
+          <div class="form-group">
+            <label for="machineMax">Cantidad Máxima</label>
+            <input type="number" id="machineMax" min="0" required>
+          </div>
+          <div class="form-group">
+            <label for="machineLocation">Ubicación</label>
+            <input type="text" id="machineLocation" required>
+          </div>
+          <button type="submit" class="btn-success">Guardar</button>
+        </form>
+      </div>
     </div>
-    
-    <button id="adminLogoutBtn" class="btn-secondary">Cerrar Sesión</button>
-  </div>
-  
-  <!-- Modal para Materiales (Admin) -->
-  <div id="materialModal" class="hidden">
-    <div class="card" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 500px; z-index: 100;">
-      <span id="closeModal" style="float: right; cursor: pointer; font-size: 24px;">&times;</span>
-      <h2 id="modalTitle">Agregar Material</h2>
-      <form id="materialForm">
-        <input type="hidden" id="materialId">
-        <div class="form-group">
-          <label for="materialName">Nombre del Material</label>
-          <input type="text" id="materialName" required>
-        </div>
-        <div class="form-group">
-          <label for="materialDescription">Descripción</label>
-          <textarea id="materialDescription" rows="2" required></textarea>
-        </div>
-        <div class="form-group">
-          <label for="materialImage">Imagen del Material</label>
-          <input type="file" id="materialImage" accept="image/*">
-          <img id="imagePreview" class="image-preview" alt="Vista previa de la imagen">
-        </div>
-        <div class="form-group">
-          <label for="materialQuantity">Cantidad Disponible</label>
-          <input type="number" id="materialQuantity" min="0" required>
-        </div>
-        <div class="form-group">
-          <label for="materialMin">Cantidad Mínima</label>
-          <input type="number" id="materialMin" min="0" required>
-        </div>
-        <div class="form-group">
-          <label for="materialMax">Cantidad Máxima</label>
-          <input type="number" id="materialMax" min="0" required>
-        </div>
-        <div class="form-group">
-          <label for="materialLocation">Ubicación</label>
-          <input type="text" id="materialLocation" required>
-        </div>
-        <button type="submit" class="btn-success">Guardar</button>
-      </form>
-    </div>
-    <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 99;"></div>
   </div>
 
   <script>
     // Datos iniciales
     const ADMIN_CREDENTIALS = {
       email: "sebaseba005@gmail.com",
-      password: "212347310"
+      password: "2025"
     };
     
     // Inicializar localStorage si está vacío
     function initializeData() {
-      if (!localStorage.getItem('materials')) {
-        const defaultMaterials = [
+      if (!localStorage.getItem('machines')) {
+        const defaultMachines = [
           {
             id: 1,
-            name: 'Laptop',
-            description: 'Laptop HP i5 8GB RAM',
-            quantity: 10,
+            name: 'Taladro eléctrico',
+            description: 'Taladro inalámbrico 18V',
+            quantity: 5,
             min: 2,
-            max: 15,
-            location: 'Laboratorio A',
+            max: 10,
+            location: 'Estante A1',
+            image: null
+          },
+          {
+            id: 2,
+            name: 'Soldadora MIG',
+            description: 'Soldadora semiautomática 220V',
+            quantity: 3,
+            min: 1,
+            max: 5,
+            location: 'Estante B2',
             image: null
           }
         ];
-        localStorage.setItem('materials', JSON.stringify(defaultMaterials));
+        localStorage.setItem('machines', JSON.stringify(defaultMachines));
       }
       
       if (!localStorage.getItem('requests')) {
@@ -426,21 +512,51 @@
       document.getElementById('adminLoginView').classList.add('hidden');
       document.getElementById('studentView').classList.add('hidden');
       document.getElementById('adminView').classList.add('hidden');
-      document.getElementById('materialModal').classList.add('hidden');
       document.getElementById(viewId).classList.remove('hidden');
+      
+      // Scroll al inicio cuando cambiamos de vista
+      document.querySelector('.app-container').scrollTo(0, 0);
     }
     
-    // Cargar materiales para estudiante
-    function loadStudentMaterials() {
-      const materials = JSON.parse(localStorage.getItem('materials'));
-      const select = document.getElementById('materialSelect');
+    // Mostrar/ocultar modal
+    function toggleModal(show) {
+      document.getElementById('machineModal').style.display = show ? 'block' : 'none';
+    }
+    
+    // Cargar máquinas para estudiante
+    function loadStudentMachines() {
+      const machines = JSON.parse(localStorage.getItem('machines'));
+      const select = document.getElementById('machineSelect');
+      const imagePreview = document.getElementById('machineImagePreview');
       
-      select.innerHTML = '<option value="">Seleccione un material...</option>';
-      materials.forEach(material => {
+      select.innerHTML = '<option value="">Seleccione una máquina...</option>';
+      imagePreview.innerHTML = '';
+      
+      machines.forEach(machine => {
         const option = document.createElement('option');
-        option.value = material.id;
-        option.textContent = `${material.name} (Disponibles: ${material.quantity})`;
+        option.value = machine.id;
+        const isLowStock = machine.quantity < machine.min;
+        const stockWarning = isLowStock ? ' (BAJO STOCK)' : '';
+        option.textContent = `${machine.name} (Disponibles: ${machine.quantity})${stockWarning}`;
+        option.setAttribute('data-image', machine.image || '');
+        if (isLowStock) {
+          option.classList.add('low-stock-option');
+        }
         select.appendChild(option);
+      });
+      
+      // Mostrar imagen cuando se selecciona una máquina
+      select.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        const imageData = selectedOption.getAttribute('data-image');
+        imagePreview.innerHTML = '';
+        
+        if (imageData) {
+          const img = document.createElement('img');
+          img.src = imageData;
+          img.className = 'machine-image';
+          imagePreview.appendChild(img);
+        }
       });
       
       // Establecer fechas por defecto
@@ -454,42 +570,54 @@
       document.getElementById('requestDate').min = today;
     }
     
-    // Cargar materiales para admin
-    function loadAdminMaterials() {
-      const materials = JSON.parse(localStorage.getItem('materials'));
-      const tbody = document.querySelector('#materialsTable tbody');
+    // Cargar máquinas para encargado
+    function loadAdminMachines() {
+      const machines = JSON.parse(localStorage.getItem('machines'));
+      const tbody = document.querySelector('#machinesTable tbody');
       
       tbody.innerHTML = '';
-      materials.forEach(material => {
+      machines.forEach((machine, index) => {
         const tr = document.createElement('tr');
+        const isLowStock = machine.quantity < machine.min;
+        
         tr.innerHTML = `
-          <td>${material.image ? `<img src="${material.image}" class="material-image">` : 'Sin imagen'}</td>
-          <td>${material.name}</td>
-          <td>${material.description}</td>
-          <td>${material.quantity}</td>
-          <td>${material.min}</td>
-          <td>${material.max}</td>
-          <td>${material.location}</td>
+          <td class="machine-image-cell">${
+            machine.image 
+              ? `<img src="${machine.image}" class="machine-image" alt="${machine.name}">` 
+              : 'Sin imagen'
+          }</td>
+          <td class="${isLowStock ? 'low-stock' : ''}">${machine.name}</td>
+          <td>${machine.description}</td>
+          <td class="${isLowStock ? 'low-stock' : ''}">${machine.quantity}</td>
+          <td>${machine.min}</td>
+          <td>${machine.max}</td>
+          <td>${machine.location}</td>
           <td>
-            <button onclick="editMaterial(${material.id})" class="btn-success">Editar</button>
-            <button onclick="deleteMaterial(${material.id})" class="btn-danger">Eliminar</button>
+            <button onclick="editMachine(${machine.id})" class="btn-success">Editar</button>
+            <button onclick="deleteMachine(${machine.id})" class="btn-danger">Eliminar</button>
           </td>
         `;
         tbody.appendChild(tr);
       });
     }
     
-    // Cargar todas las solicitudes para admin
+    // Cargar todas las solicitudes para encargado
     function loadAdminRequests() {
       const requests = JSON.parse(localStorage.getItem('requests'));
       const tbody = document.querySelector('#adminRequestsTable tbody');
       
       tbody.innerHTML = '';
+      if (requests.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8">No hay solicitudes registradas</td></tr>';
+        return;
+      }
+      
       requests.forEach((request, index) => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td>${request.studentName}</td>
-          <td>${request.materialName}</td>
+          <td>${request.studentEmail}</td>
+          <td>${request.machineName}</td>
           <td>${request.quantity}</td>
           <td>${request.requestDate}</td>
           <td>${request.returnDate}</td>
@@ -497,47 +625,58 @@
           <td>
             <button onclick="approveRequest(${index})" class="btn-success">Aprobar</button>
             <button onclick="rejectRequest(${index})" class="btn-danger">Rechazar</button>
+            <button onclick="deleteRequest(${index})" class="btn-danger">Eliminar</button>
           </td>
         `;
         tbody.appendChild(tr);
       });
     }
     
-    // Editar material
-    function editMaterial(id) {
-      const materials = JSON.parse(localStorage.getItem('materials'));
-      const material = materials.find(m => m.id == id);
+    // Editar máquina
+    function editMachine(id) {
+      const machines = JSON.parse(localStorage.getItem('machines'));
+      const machine = machines.find(m => m.id == id);
       
-      if (material) {
-        document.getElementById('modalTitle').textContent = 'Editar Material';
-        document.getElementById('materialId').value = material.id;
-        document.getElementById('materialName').value = material.name;
-        document.getElementById('materialDescription').value = material.description;
-        document.getElementById('materialQuantity').value = material.quantity;
-        document.getElementById('materialMin').value = material.min;
-        document.getElementById('materialMax').value = material.max;
-        document.getElementById('materialLocation').value = material.location;
+      if (machine) {
+        document.getElementById('modalTitle').textContent = 'Editar Máquina';
+        document.getElementById('machineId').value = machine.id;
+        document.getElementById('machineName').value = machine.name;
+        document.getElementById('machineDescription').value = machine.description;
+        document.getElementById('machineQuantity').value = machine.quantity;
+        document.getElementById('machineMin').value = machine.min;
+        document.getElementById('machineMax').value = machine.max;
+        document.getElementById('machineLocation').value = machine.location;
         
         const imagePreview = document.getElementById('imagePreview');
-        if (material.image) {
-          imagePreview.src = material.image;
+        if (machine.image) {
+          imagePreview.src = machine.image;
           imagePreview.style.display = 'block';
         } else {
           imagePreview.style.display = 'none';
         }
         
-        document.getElementById('materialModal').classList.remove('hidden');
+        toggleModal(true);
       }
     }
     
-    // Eliminar material
-    function deleteMaterial(id) {
-      if (confirm('¿Está seguro de eliminar este material?')) {
-        let materials = JSON.parse(localStorage.getItem('materials'));
-        materials = materials.filter(m => m.id != id);
-        localStorage.setItem('materials', JSON.stringify(materials));
-        loadAdminMaterials();
-        loadStudentMaterials();
+    // Eliminar máquina
+    function deleteMachine(id) {
+      if (confirm('¿Está seguro de eliminar esta máquina?')) {
+        let machines = JSON.parse(localStorage.getItem('machines'));
+        machines = machines.filter(m => m.id != id);
+        localStorage.setItem('machines', JSON.stringify(machines));
+        loadAdminMachines();
+        loadStudentMachines();
+      }
+    }
+    
+    // Eliminar solicitud
+    function deleteRequest(index) {
+      if (confirm('¿Está seguro de eliminar esta solicitud?')) {
+        let requests = JSON.parse(localStorage.getItem('requests'));
+        requests.splice(index, 1);
+        localStorage.setItem('requests', JSON.stringify(requests));
+        loadAdminRequests();
       }
     }
     
@@ -548,22 +687,22 @@
       
       if (request.status === 'Pendiente') {
         // Actualizar el inventario
-        const materials = JSON.parse(localStorage.getItem('materials'));
-        const materialIndex = materials.findIndex(m => m.id == request.materialId);
+        const machines = JSON.parse(localStorage.getItem('machines'));
+        const machineIndex = machines.findIndex(m => m.id == request.machineId);
         
-        if (materialIndex !== -1) {
-          const material = materials[materialIndex];
-          if (material.quantity >= request.quantity) {
-            material.quantity -= request.quantity;
+        if (machineIndex !== -1) {
+          const machine = machines[machineIndex];
+          if (machine.quantity >= request.quantity) {
+            machine.quantity -= request.quantity;
             requests[index].status = 'Aprobado';
             
-            localStorage.setItem('materials', JSON.stringify(materials));
+            localStorage.setItem('machines', JSON.stringify(machines));
             localStorage.setItem('requests', JSON.stringify(requests));
             
-            loadAdminMaterials();
+            loadAdminMachines();
             loadAdminRequests();
           } else {
-            alert('No hay suficiente cantidad disponible de este material');
+            alert('No hay suficiente cantidad disponible de esta máquina');
           }
         }
       }
@@ -577,15 +716,15 @@
       loadAdminRequests();
     }
     
-    // Exportar a Excel
-    function exportToExcel() {
-      const materials = JSON.parse(localStorage.getItem('materials'));
+    // Exportar máquinas a Excel con el formato solicitado
+    function exportMachinesToExcel() {
+      const machines = JSON.parse(localStorage.getItem('machines'));
       
-      // Crear contenido CSV
-      let csvContent = "Nombre,Descripción,Cantidad Disponible,Cantidad Mínima,Cantidad Máxima,Ubicación\n";
+      // Crear contenido CSV con el formato solicitado
+      let csvContent = "ITEM\tDESCRIPCIÓN\tCANTIDAD\tUBICACIÓN\n";
       
-      materials.forEach(material => {
-        csvContent += `"${material.name}","${material.description}",${material.quantity},${material.min},${material.max},"${material.location}"\n`;
+      machines.forEach((machine, index) => {
+        csvContent += `${index + 1}\t${machine.name}\t${machine.quantity}\t${machine.location}\n`;
       });
       
       // Crear archivo y descargar
@@ -594,7 +733,32 @@
       const url = URL.createObjectURL(blob);
       
       link.setAttribute('href', url);
-      link.setAttribute('download', 'inventario_materiales.csv');
+      link.setAttribute('download', 'inventario_maquinas.csv');
+      link.style.visibility = 'hidden';
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+    
+    // Exportar solicitudes a Excel
+    function exportRequestsToExcel() {
+      const requests = JSON.parse(localStorage.getItem('requests'));
+      
+      // Crear contenido CSV para las solicitudes
+      let csvContent = "ITEM\tESTUDIANTE\tCORREO\tMÁQUINA\tCANTIDAD\tFECHA PRÉSTAMO\tFECHA DEVOLUCIÓN\tESTADO\n";
+      
+      requests.forEach((request, index) => {
+        csvContent += `${index + 1}\t${request.studentName}\t${request.studentEmail}\t${request.machineName}\t${request.quantity}\t${request.requestDate}\t${request.returnDate}\t${request.status}\n`;
+      });
+      
+      // Crear archivo y descargar
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      
+      link.setAttribute('href', url);
+      link.setAttribute('download', 'solicitudes_maquinas.csv');
       link.style.visibility = 'hidden';
       
       document.body.appendChild(link);
@@ -605,11 +769,11 @@
     // Simular envío de correo
     function sendEmailConfirmation(request) {
       console.log("Enviando correo a:", request.studentEmail);
-      console.log("Asunto: Confirmación de solicitud de material");
+      console.log("Asunto: Confirmación de solicitud de máquina");
       console.log("Contenido:", `
         Hola ${request.studentName},
         
-        Hemos recibido tu solicitud para el material "${request.materialName}".
+        Hemos recibido tu solicitud para la máquina "${request.machineName}".
         
         Detalles:
         - Cantidad: ${request.quantity}
@@ -629,7 +793,7 @@
       document.getElementById('studentRoleBtn').addEventListener('click', function() {
         showView('studentView');
         document.getElementById('confirmationMessage').style.display = 'none';
-        loadStudentMaterials();
+        loadStudentMachines();
       });
       
       document.getElementById('adminRoleBtn').addEventListener('click', function() {
@@ -641,7 +805,7 @@
         showView('roleSelectionView');
       });
       
-      // Login de administrador
+      // Login de encargado
       document.getElementById('adminLoginForm').addEventListener('submit', function(e) {
         e.preventDefault();
         const email = document.getElementById('adminEmail').value;
@@ -649,7 +813,7 @@
         
         if (email === ADMIN_CREDENTIALS.email && password === ADMIN_CREDENTIALS.password) {
           showView('adminView');
-          loadAdminMaterials();
+          loadAdminMachines();
           loadAdminRequests();
         } else {
           alert('Credenciales incorrectas');
@@ -660,9 +824,9 @@
       document.getElementById('requestForm').addEventListener('submit', function(e) {
         e.preventDefault();
         
-        const materialSelect = document.getElementById('materialSelect');
-        const selectedOption = materialSelect.options[materialSelect.selectedIndex];
-        const materialName = selectedOption.text.split(' (')[0];
+        const machineSelect = document.getElementById('machineSelect');
+        const selectedOption = machineSelect.options[machineSelect.selectedIndex];
+        const machineName = selectedOption.text.split(' (')[0];
         const quantity = parseInt(document.getElementById('requestQuantity').value);
         
         const request = {
@@ -671,8 +835,8 @@
           studentEmail: document.getElementById('studentEmail').value,
           studentPhone: document.getElementById('studentPhone').value,
           studentCareer: document.getElementById('studentCareer').value,
-          materialId: materialSelect.value,
-          materialName: materialName,
+          machineId: machineSelect.value,
+          machineName: machineName,
           quantity: quantity,
           requestDate: document.getElementById('requestDate').value,
           returnDate: document.getElementById('returnDate').value,
@@ -693,24 +857,20 @@
         sendEmailConfirmation(request);
         
         // Restablecer fechas
-        loadStudentMaterials();
+        loadStudentMachines();
       });
       
-      // Gestión de materiales (admin)
-      document.getElementById('addMaterialBtn').addEventListener('click', function() {
-        document.getElementById('modalTitle').textContent = 'Agregar Material';
-        document.getElementById('materialForm').reset();
-        document.getElementById('materialId').value = '';
+      // Botón para agregar máquina
+      document.getElementById('addMachineBtn').addEventListener('click', function() {
+        document.getElementById('modalTitle').textContent = 'Agregar Máquina';
+        document.getElementById('machineForm').reset();
+        document.getElementById('machineId').value = '';
         document.getElementById('imagePreview').style.display = 'none';
-        document.getElementById('materialModal').classList.remove('hidden');
+        toggleModal(true);
       });
       
-      document.getElementById('closeModal').addEventListener('click', function() {
-        document.getElementById('materialModal').classList.add('hidden');
-      });
-      
-      // Vista previa de la imagen
-      document.getElementById('materialImage').addEventListener('change', function(e) {
+      // Vista previa de imagen al seleccionar archivo
+      document.getElementById('machineImage').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (file) {
           const reader = new FileReader();
@@ -723,46 +883,58 @@
         }
       });
       
-      document.getElementById('materialForm').addEventListener('submit', async function(e) {
+      // Cerrar modal
+      document.querySelector('.close').addEventListener('click', function() {
+        toggleModal(false);
+      });
+      
+      // Guardar máquina (agregar/editar)
+      document.getElementById('machineForm').addEventListener('submit', async function(e) {
         e.preventDefault();
         
-        const imageFile = document.getElementById('materialImage').files[0];
+        const imageFile = document.getElementById('machineImage').files[0];
         let imageBase64 = null;
         
         if (imageFile) {
           imageBase64 = await getBase64(imageFile);
         }
         
-        const material = {
-          id: document.getElementById('materialId').value || Date.now(),
-          name: document.getElementById('materialName').value,
-          description: document.getElementById('materialDescription').value,
-          quantity: parseInt(document.getElementById('materialQuantity').value),
-          min: parseInt(document.getElementById('materialMin').value),
-          max: parseInt(document.getElementById('materialMax').value),
-          location: document.getElementById('materialLocation').value,
+        const machine = {
+          id: document.getElementById('machineId').value || Date.now(),
+          name: document.getElementById('machineName').value,
+          description: document.getElementById('machineDescription').value,
+          quantity: parseInt(document.getElementById('machineQuantity').value),
+          min: parseInt(document.getElementById('machineMin').value),
+          max: parseInt(document.getElementById('machineMax').value),
+          location: document.getElementById('machineLocation').value,
           image: imageBase64
         };
         
-        let materials = JSON.parse(localStorage.getItem('materials'));
+        let machines = JSON.parse(localStorage.getItem('machines'));
         
-        if (document.getElementById('materialId').value) {
-          // Editar material existente (mantener imagen si no se subió una nueva)
-          const existingMaterial = materials.find(m => m.id == material.id);
-          if (!imageBase64 && existingMaterial && existingMaterial.image) {
-            material.image = existingMaterial.image;
+        if (document.getElementById('machineId').value) {
+          // Editar máquina existente (mantener imagen si no se subió una nueva)
+          const existingMachine = machines.find(m => m.id == machine.id);
+          if (!imageBase64 && existingMachine && existingMachine.image) {
+            machine.image = existingMachine.image;
           }
-          materials = materials.map(m => m.id == material.id ? material : m);
+          machines = machines.map(m => m.id == machine.id ? machine : m);
         } else {
-          // Agregar nuevo material
-          materials.push(material);
+          // Agregar nueva máquina
+          machines.push(machine);
         }
         
-        localStorage.setItem('materials', JSON.stringify(materials));
-        document.getElementById('materialModal').classList.add('hidden');
-        loadAdminMaterials();
-        loadStudentMaterials();
+        localStorage.setItem('machines', JSON.stringify(machines));
+        toggleModal(false);
+        loadAdminMachines();
+        loadStudentMachines();
       });
+      
+      // Botón para exportar máquinas a Excel
+      document.getElementById('exportMachinesExcelBtn').addEventListener('click', exportMachinesToExcel);
+      
+      // Botón para exportar solicitudes a Excel
+      document.getElementById('exportRequestsExcelBtn').addEventListener('click', exportRequestsToExcel);
       
       // Botones de logout
       document.getElementById('studentLogoutBtn').addEventListener('click', function() {
@@ -783,9 +955,5 @@
       });
     });
   </script>
-</body>
-</html>
-<!-- partial -->
-  
 </body>
 </html>
